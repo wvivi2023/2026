@@ -1,5 +1,7 @@
 from fastapi import FastAPI, HTTPException
+from fastapi import Header
 from pydantic import BaseModel
+
 import jwt
 from datetime import datetime, timedelta
 
@@ -12,7 +14,7 @@ class LoginRequest(BaseModel):
     username: str
     password: str
 
-# 登录接口
+# login endpoint, return JWT token if successful
 @app.post("/login")
 def login(req: LoginRequest):
     username = req.username
@@ -27,9 +29,9 @@ def login(req: LoginRequest):
         return {"token": token}
     raise HTTPException(status_code=401, detail="账号密码错误")
 
-# 需要Token鉴权的用户信息接口
+#need token to authenticate user info endpoint
 @app.get("/user/info")
-def user_info(authorization: str = None):
+def user_info(authorization: str = Header(None)): 
     if not authorization or not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail="Unauthorized")
     token = authorization.split(" ")[1]
